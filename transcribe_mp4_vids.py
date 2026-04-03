@@ -6,9 +6,9 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 
 OVERWRITE_EXISTING = False  # Set to True to regenerate .srt files that already exist
 
-dir = "/mnt/c/Users/youss/Downloads/Charlie Morgan - Imperium Academy™ VIP/"
+dir = "/mnt/c/Users/youss/Downloads/tmp"
 
-model = whisper.load_model("medium")
+model = whisper.load_model("base")
 
 
 def convert_mp4_to_mp3(input_file, output_file):
@@ -35,14 +35,18 @@ def transcribe_audio(mp3_path, srt_path):
 
 
 if __name__ == "__main__":
-    for file in os.listdir(dir):
-        filename, file_extension = os.path.splitext(file)
-        if file_extension == ".mp4":
-            srt_path = os.path.join(dir, filename + ".srt")
-            if os.path.exists(srt_path) and not OVERWRITE_EXISTING:
-                continue
-            file_path = os.path.join(dir, file)
-            mp3_path = os.path.join(dir, f"{filename}.mp3")
-            convert_mp4_to_mp3(file_path, mp3_path)
-            transcribe_audio(mp3_path, srt_path)
-            os.remove(mp3_path)
+    for folder, _, files in os.walk(dir):
+        for file in files:
+            filename, file_extension = os.path.splitext(file)
+            if file_extension.lower() in (".mp4", ".mov"):
+                srt_path = os.path.join(folder, filename + ".srt")
+                if os.path.exists(srt_path) and not OVERWRITE_EXISTING:
+                    continue
+                file_path = os.path.join(folder, file)
+                mp3_path = os.path.join(folder, f"{filename}.mp3")
+                try:
+                    convert_mp4_to_mp3(file_path, mp3_path)
+                    transcribe_audio(mp3_path, srt_path)
+                    os.remove(mp3_path)
+                except (OSError, TypeError) as e:
+                    print(f"Skipping corrupt/invalid file: {file_path}\n  Error: {e}")

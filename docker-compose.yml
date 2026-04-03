@@ -1,0 +1,20 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: always
+
+  backend:
+    build: ./backend
+    volumes:
+      - ./knowledge_bases:/data/knowledge_bases
+      # Mount extra host dirs here for "import from path" feature:
+      # - /path/on/host:/data/imports
+    environment:
+      - KB_DIR=/data/knowledge_bases
+    restart: always
